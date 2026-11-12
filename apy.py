@@ -1,11 +1,9 @@
-import os
 import sqlite3
-from flask import Flask, request, render_template_string
+from flask import Flask, request
  
 app = Flask(__name__)
  
-# Contraseña desde variable de entorno
-DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_PASSWORD = "admin123"
  
  
 def get_db():
@@ -22,25 +20,21 @@ def inicio():
     return "App taller SAST"
  
  
-# Consulta por parametros
+# SQL Inyection
 @app.route("/buscar")
 def buscar():
     nombre = request.args.get("nombre", "")
-    cur = get_db().execute("SELECT * FROM users WHERE username = ?", (nombre,))
+    cur = get_db().execute("SELECT * FROM users WHERE username = '" + nombre + "'")
     return str(cur.fetchall())
  
  
-# Plantilla con autoescape
+# XSS
 @app.route("/saludo")
 def saludo():
     nombre = request.args.get("nombre", "")
-    return render_template_string("<h1>Hola {{ nombre }}</h1>", nombre=nombre)
+    return "<h1>Hola " + nombre + "</h1>"
  
  
-# Sin debug
-def main():
-    app.run()
- 
- 
+# Debug activo
 if __name__ == "__main__":
-    main()
+    app.run(debug=True)
